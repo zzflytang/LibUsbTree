@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace lunOptics.LibUsbTree
+namespace lunOptics.libUsbTree
 {
     [Serializable]
     public class UsbTreeException : Exception
