@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace lunOptics.libUsbTree
 {
-    internal static class DevPropKeys
+    public static class DevPropKeys
     {
         public static DEVPROPKEY DeviceInstanceID =      new DEVPROPKEY() { pid = 256, fmtid = new Guid(0x78c34fc8, 0x104a, 0x4aca, 0x9e, 0xa4, 0x52, 0x4d, 0x52, 0x99, 0x6e, 0x57) };
         public static DEVPROPKEY Name =                  new DEVPROPKEY() { pid = 10,  fmtid = new Guid(0xb725f130, 0x47ef, 0x101a, 0xa5, 0xf1, 0x02, 0x60, 0x8c, 0x9e, 0xeb, 0xac) };    

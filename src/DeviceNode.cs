@@ -16,6 +16,7 @@ namespace lunOptics.libUsbTree
         public int pid { get; private set; } = -1;
         public int mi { get; private set; } = -1;
         public bool isInterface { get; private set; }
+        public bool isUsbFunction { get; private set; }
         public List<InfoNode> children { get; private set; } = new List<InfoNode>();
         #endregion
 
@@ -71,7 +72,9 @@ namespace lunOptics.libUsbTree
                 Match mMI = Regex.Match(p[1], @"MI_([0-9A-F]{2})", RegexOptions.IgnoreCase);
                 if (mMI.Success) mi = Convert.ToInt32(mMI.Groups[1].Value, 16);
 
-                isInterface = mi != -1 || enumerator != "USB";
+                isUsbFunction = mi != -1 && enumerator == "USB";
+
+                isInterface = !isUsbFunction && (mi != -1 || enumerator != "USB");
             }
         }
         #endregion

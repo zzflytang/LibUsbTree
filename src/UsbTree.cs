@@ -63,8 +63,8 @@ namespace lunOptics.libUsbTree
         {
             timer.Stop(); // avoid reentrance
 
-            var sw = new Stopwatch();
-            sw.Start();
+            //var sw = new Stopwatch();
+            //sw.Start();
             newTree = new InfoNode(rootNodes);
             if(!newTree.isEqual(oldTree))
             {
@@ -73,8 +73,8 @@ namespace lunOptics.libUsbTree
                 UpdateDeviceList();          // reflect all changes in the flat device list     
                 oldTree = newTree;
             }
-            sw.Stop();
-            Debug.WriteLine(sw.Elapsed.TotalMilliseconds);
+            //sw.Stop();
+            //Debug.WriteLine(sw.Elapsed.TotalMilliseconds);
 
             timer.Start();
         }

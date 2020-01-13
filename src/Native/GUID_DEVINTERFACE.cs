@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace lunOptics.LibUsbTree.Native
+namespace lunOptics.libUsbTree.Native
 {
     /// <summary>
     /// taken from http://msdn.microsoft.com/en-us/library/windows/hardware/ff553412(v=vs.85).aspx
     /// </summary>
-    internal static class GUID_DEVINTERFACE
+    public static class GUID_DEVINTERFACE
     {
         public readonly static Guid BUS1394_CLASS_GUID = new Guid("6BDD1FC1-810F-11d0-BEC7-08002BE2092F");
         public readonly static Guid GUID_61883_CLASS = new Guid("7EBEFBC0-3200-11d2-B4C2-00A0C9697D07");

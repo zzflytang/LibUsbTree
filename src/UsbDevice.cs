@@ -13,59 +13,27 @@ namespace lunOptics.libUsbTree
     {
         #region public properties and methods ---------------------------------
 
-        public string DeviceInstanceID
-        {
-            get => _deviceInstanceID;
-            private set => SetProperty(ref _deviceInstanceID, value);
-        }
-        public List<string> HardwareIDs
-        {
-            get => _hardwareIDs;
-            private set => SetProperty(ref _hardwareIDs, value);
-        }
-        public string Description
-        {
-            get => _description;
-            set => SetProperty(ref _description, value);
-        }       
-        public bool IsConnected { get; internal set; }
+        public int node { get; private set; }
+        public string DeviceInstanceID { get; private set; }
+        public List<string> HardwareIDs { get; private set; }
+        public string Description { get; protected set; }
+        public bool IsConnected { get; protected set; }
         public Guid ClassGuid { get; private set; }
-        public string ClassDescription
-        {
-            get => _classDescription;
-            protected set => SetProperty(ref _classDescription, value);
-        }
+        public string ClassDescription { get; private set; }
         protected string SnString { get; private set; }
-        public int Vid
-        {
-            get => _vid;
-            protected set => SetProperty(ref _vid, value);
-        }
-        public int Pid
-        {
-            get => _pid;
-            protected set => SetProperty(ref _pid, value);
-        }
-        public int Rev
-        {
-            get => _rev;
-            protected set => SetProperty(ref _rev, value);
-        }
-        public int Mi
-        {
-            get => _mi;
-            protected set => SetProperty(ref _mi, value);
-        }
-        public bool IsInterface
-        {
-            get => _isUsbInterface;
-            protected set => SetProperty(ref _isUsbInterface, value);
-        }        
+        public int Vid { get; private set; }
+        public int Pid { get; private set; }
+        public int Rev { get; private set; }
+        public int Mi { get; private set; }
+        public uint HidUsageID { get; private set; }
+        public bool IsInterface { get; private set; }
+        public bool IsUsbFunction { get; private set; }
         public ObservableCollection<UsbDevice> children { get; } = new ObservableCollection<UsbDevice>();
+        public ObservableCollection<UsbDevice> functions { get; } = new ObservableCollection<UsbDevice>();
         public ObservableCollection<UsbDevice> interfaces { get; } = new ObservableCollection<UsbDevice>();
 
         public event PropertyChangedEventHandler PropertyChanged;
-                
+
         public virtual bool isEqual(InfoNode other)
         {
             return other != null && this.DeviceInstanceID == other.devInstId;
@@ -77,14 +45,36 @@ namespace lunOptics.libUsbTree
 
         public override string ToString()
         {
-            return $"{Description} ({Vid:X4}/{Pid:X4}) #{SnString}";
-        }        
+            return $"{ClassDescription} {Description} ({Vid:X4}/{Pid:X4}) #{SnString}";
+        }
         #endregion
 
         #region construction -------------------------------------------
         private void doUpdate(InfoNode info)
         {
             if (info == null) return;
+
+            foreach (var childInfo in info.children)
+            {
+                if (childInfo.isInterface)
+                    interfaces.AddIfNew(UsbTree.deviceFactory.MakeOrUpdate(childInfo));
+                else if (childInfo.isUsbFunction)
+                    functions.AddIfNew(UsbTree.deviceFactory.MakeOrUpdate(childInfo));
+                else
+                    children.AddIfNew(UsbTree.deviceFactory.MakeOrUpdate(childInfo));
+            }
+
+            foreach (var child in children.ToList())
+            {
+                if (!info.children.Any(i => child.isEqual(i)))  // if child is currently disconnected
+                {
+                    child.interfaces.Clear();
+                    child.functions.Clear();
+                    child.children.Clear();
+                    children.Remove(child);
+                }
+            }
+
             if (info.node >= 0) // root node only updates its children
             {
                 if (!String.IsNullOrEmpty(info.devInstId)) // driver not yet loaded or other error (happened)
@@ -94,65 +84,46 @@ namespace lunOptics.libUsbTree
                     Pid = info.pid;
                     Mi = info.mi;
                     IsInterface = info.isInterface;
+                    IsUsbFunction = info.isUsbFunction;
                     SnString = info.serNumStr;
+                    node = info.node;
 
                     Description = cmGetNodePropStrg(info.node, DevPropKeys.Name) ?? "ERR: No Value";
                     ClassGuid = cmGetNodePropGuid(info.node, DevPropKeys.DeviceClassGuid);
                     ClassDescription = cmGetNodePropStrg(info.node, DevPropKeys.DeviceClass) ?? "ERR: No Value";
                     HardwareIDs = cmGetNodePropStringList(info.node, DevPropKeys.HardwareIds);
-                    if (HardwareIDs.Count > 0)
+
+                    string s = @"HID_DEVICE_UP:([0-9A-F]{4})_U:([0-9A-F]{4})";
+                    var match = HardwareIDs.Select(id => Regex.Match(id, s, RegexOptions.IgnoreCase)).FirstOrDefault(m => m.Success);
+                    if (match != null)
                     {
-                        Match mRev = Regex.Match(HardwareIDs[0], @"REV[_]?([0-9A-F]{4})", RegexOptions.IgnoreCase);
-                        if (mRev.Success) Rev = Convert.ToInt32(mRev.Groups[1].Value, 16);
+                        HidUsageID = (uint)Convert.ToUInt16(match.Groups[1].Value, 16) << 16 | Convert.ToUInt16(match.Groups[2].Value, 16);
                     }
 
-                   // var loci = CM_GetNodePropStrg(info.node, DevPropKeys.LocationInfo);
+                    s = @"REV[_]?([0-9A-F]{4})";
+                    match = HardwareIDs.Select(id => Regex.Match(id, s, RegexOptions.IgnoreCase)).FirstOrDefault(m => m.Success);
+                    if (match != null)
+                    {
+                        Rev = Convert.ToInt32(match.Groups[1].Value, 16);
+                    }
                 }
                 else
                 {
                     DeviceInstanceID = "ERR: No DeviceInstanceID";
                     Description = "ERR: No Description";
                 }
+                OnPropertyChanged("");
             }
 
-            foreach (var childInfo in info.children)
-            {
-                if (childInfo.isInterface)
-                    interfaces.AddIfNew(UsbTree.deviceFactory.MakeOrUpdate(childInfo));
-                else
-                    children.AddIfNew(UsbTree.deviceFactory.MakeOrUpdate(childInfo));
-            }
-
-            foreach (var child in children.ToList())//.Where(c => !info.children.Any(i => c.isEqual(i))).ToList())
-            {
-                if (!info.children.Any(i => child.isEqual(i)))  // if child is currently connected
-                {
-                    child.interfaces.Clear();
-                    child.children.Clear();
-                    children.Remove(child);
-                }
-            }
         }
 
         public UsbDevice(InfoNode info = null)
         {
             doUpdate(info);
         }
-        
-        #endregion
-
-        #region internal fields and methods ----------------------------
-
-        private bool _isUsbInterface;
-        private int _vid =-1, _pid=-1, _rev=-1, _mi=-1;        
-        private string _deviceInstanceID;
-        private string _description;
-        private string _classDescription;
-        private List<string> _hardwareIDs;
-     
 
         #endregion
-
+               
         #region INotifyPropertyChanged
         protected void SetProperty<T>(ref T field, T value, [CallerMemberName] string name = "")
         {
