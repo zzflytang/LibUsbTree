@@ -24,7 +24,7 @@ namespace lunOptics.libUsbTree
 
         #region construction/deconstruction ------------------------------------------------------------
                
-        public UsbTree(SynchronizationContext SyncContext = null, DeviceFactory factory = null)
+        public UsbTree(DeviceFactory factory = null, SynchronizationContext SyncContext = null)
         {
             deviceFactory = factory ?? new DeviceFactory();  // for simple use do not require (but allow) dependency injection
             rootNodes = FindUsbRoots(); 
