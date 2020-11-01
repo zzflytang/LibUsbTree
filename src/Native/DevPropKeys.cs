@@ -5,6 +5,7 @@ namespace lunOptics.libUsbTree
 {
     public static class DevPropKeys
     {
+#pragma warning disable CA2211 // Non-constant fields should not be visible
         public static DEVPROPKEY DeviceInstanceID =      new DEVPROPKEY() { pid = 256, fmtid = new Guid(0x78c34fc8, 0x104a, 0x4aca, 0x9e, 0xa4, 0x52, 0x4d, 0x52, 0x99, 0x6e, 0x57) };
         public static DEVPROPKEY Name =                  new DEVPROPKEY() { pid = 10,  fmtid = new Guid(0xb725f130, 0x47ef, 0x101a, 0xa5, 0xf1, 0x02, 0x60, 0x8c, 0x9e, 0xeb, 0xac) };    
         public static DEVPROPKEY BusReportedDeviceDesc = new DEVPROPKEY() { pid = 4,   fmtid = new Guid(0x540b947e, 0x8b40, 0x45bc, 0xa8, 0xa2, 0x6a, 0x0b, 0x89, 0x4c, 0xbd, 0xa2) };
@@ -21,6 +22,7 @@ namespace lunOptics.libUsbTree
         public static DEVPROPKEY LocationInfo =          new DEVPROPKEY() { pid = 15, fmtid = GUID_SPDRP};
         public static DEVPROPKEY EnumeratorName =        new DEVPROPKEY() { pid = 24, fmtid = GUID_SPDRP };
         public static DEVPROPKEY ContainerID =           new DEVPROPKEY() { pid = 38,  fmtid = GUID_SPDRP };
+#pragma warning restore CA2211 // Non-constant fields should not be visible
     }
     
 #pragma warning disable CA1815 // Override equals and operator equals on value types
