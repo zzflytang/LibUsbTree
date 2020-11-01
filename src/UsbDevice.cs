@@ -9,7 +9,7 @@ using static lunOptics.libUsbTree.NativeWrapper;
 
 namespace lunOptics.libUsbTree
 {
-    public class UsbDevice : INotifyPropertyChanged
+    public class UsbDevice : IUsbDevice, INotifyPropertyChanged 
     {
         #region public properties and methods ---------------------------------
 
@@ -28,9 +28,9 @@ namespace lunOptics.libUsbTree
         public uint HidUsageID { get; private set; }
         public bool IsInterface { get; private set; }
         public bool IsUsbFunction { get; private set; }
-        public ObservableCollection<UsbDevice> children { get; } = new ObservableCollection<UsbDevice>();
-        public ObservableCollection<UsbDevice> functions { get; } = new ObservableCollection<UsbDevice>();
-        public ObservableCollection<UsbDevice> interfaces { get; } = new ObservableCollection<UsbDevice>();
+        public ObservableCollection<IUsbDevice> children { get; } = new ObservableCollection<IUsbDevice>();
+        public ObservableCollection<IUsbDevice> functions { get; } = new ObservableCollection<IUsbDevice>();
+        public ObservableCollection<IUsbDevice> interfaces { get; } = new ObservableCollection<IUsbDevice>();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -66,7 +66,7 @@ namespace lunOptics.libUsbTree
 
             foreach (var child in children.ToList())
             {
-                if (!info.children.Any(i => child.isEqual(i)))  // if child is currently disconnected
+                if (!info.children.Any(i => ((UsbDevice) child).isEqual(i)))  // if child is currently disconnected
                 {
                     child.interfaces.Clear();
                     child.functions.Clear();

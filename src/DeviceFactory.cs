@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using lunOptics.libUsbTree.Implementation;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace lunOptics.libUsbTree
@@ -6,18 +7,18 @@ namespace lunOptics.libUsbTree
     public class DeviceFactory
     {
         // override in a derived class
-        public virtual UsbDevice newDevice(InfoNode deviceInfo)
+        public virtual IUsbDevice newDevice(InfoNode deviceInfo)
         {
             return new UsbDevice(deviceInfo);
         }
 
-        internal UsbDevice MakeOrUpdate(InfoNode deviceInfo)
+        internal IUsbDevice MakeOrUpdate(InfoNode deviceInfo)
         {
             var cached = repository.FirstOrDefault(d => d.isEqual(deviceInfo));
             if (cached == null)
             {
                 var device = newDevice(deviceInfo);
-                repository.Add(device);
+                repository.Add((UsbDevice)device);
                 //Debug.WriteLine($"C: {device.Description} - {device.DeviceInstanceID}");
                 return device;
             }

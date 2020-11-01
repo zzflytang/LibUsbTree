@@ -1,9 +1,8 @@
 ﻿//using MoreLinq;
+using lunOptics.libUsbTree.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -16,10 +15,12 @@ namespace lunOptics.libUsbTree
     {
         #region properties -----------------------------------------------------------------------------
 
-        public UsbDevice DeviceTree { get; } = new UsbDevice();
-        public ObservableCollection<UsbDevice> DeviceList { get; } = new ObservableCollection<UsbDevice>();
+        public IUsbDevice DeviceTree => _deviceTree;
+
+        private UsbDevice _deviceTree = new UsbDevice();
+        public ObservableCollection<IUsbDevice> DeviceList { get; } = new ObservableCollection<IUsbDevice>();
        
-        public static DeviceFactory deviceFactory { get; private set; }
+        internal static DeviceFactory deviceFactory { get; private set; }
         #endregion
 
         #region construction/deconstruction ------------------------------------------------------------
@@ -69,7 +70,7 @@ namespace lunOptics.libUsbTree
             if(!newTree.isEqual(oldTree))
             {
                 newTree.readDetails();
-                DeviceTree.update(newTree);  // update the complete device tree. Add/remove devices if necessary
+                _deviceTree.update(newTree);  // update the complete device tree. Add/remove devices if necessary
                 UpdateDeviceList();          // reflect all changes in the flat device list     
                 oldTree = newTree;
             }
@@ -117,7 +118,7 @@ namespace lunOptics.libUsbTree
         #endregion
     }
 
-    public partial class MyExtensions
+    static public partial class MyExtensions
     {
         public static IEnumerable<T> myFlatten<T>(this IEnumerable<T> e, Func<T, IEnumerable<T>> f)
         {
