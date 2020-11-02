@@ -17,8 +17,10 @@ namespace lunOptics.libUsbTree
 
         public IUsbDevice DeviceTree => _deviceTree;
 
-        private UsbDevice _deviceTree = new UsbDevice();
+        private readonly UsbDevice _deviceTree = new UsbDevice();
         public ObservableCollection<IUsbDevice> DeviceList { get; } = new ObservableCollection<IUsbDevice>();
+
+        public List<IUsbDevice> dlist { get; } = new List<IUsbDevice>();
        
         internal static DeviceFactory deviceFactory { get; private set; }
         #endregion
@@ -88,7 +90,10 @@ namespace lunOptics.libUsbTree
             var removedDevices = DeviceList.Except(flatList).ToList();
             
             newDevices.ForEach(d => DeviceList.Add(d));
-            removedDevices.ForEach(d => DeviceList.Remove(d));           
+            removedDevices.ForEach(d => DeviceList.Remove(d));
+
+            newDevices.ForEach(d => dlist.Add(d));
+            removedDevices.ForEach(d => dlist.Remove(d));
         }
 
         private List<int> FindUsbRoots()
