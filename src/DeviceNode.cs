@@ -84,7 +84,7 @@ namespace lunOptics.libUsbTree
             if (other == null || other.node != node || other.children.Count != children.Count) return false;
             for (int i = 0; i < children.Count; i++)
             {
-                if (!children[i].isEqual(other.children[i])) return false;
+                if (!children[i].isEqual(other.children[i])) return false;                
             }
             return true;
         }  // compares trees by comparing the node structure to check if any devices where added/removed

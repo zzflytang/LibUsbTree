@@ -11,7 +11,7 @@ using static lunOptics.libUsbTree.NativeWrapper;
 
 namespace lunOptics.libUsbTree
 {
-    public class UsbTree : IDisposable  
+    public class UsbTree : IDisposable
     {
         #region properties -----------------------------------------------------------------------------
 
@@ -21,16 +21,16 @@ namespace lunOptics.libUsbTree
         public ObservableCollection<IUsbDevice> DeviceList { get; } = new ObservableCollection<IUsbDevice>();
 
         public List<IUsbDevice> dlist { get; } = new List<IUsbDevice>();
-       
+
         internal static DeviceFactory deviceFactory { get; private set; }
         #endregion
 
         #region construction/deconstruction ------------------------------------------------------------
-               
+
         public UsbTree(DeviceFactory factory = null, SynchronizationContext SyncContext = null)
         {
             deviceFactory = factory ?? new DeviceFactory();  // for simple use do not require (but allow) dependency injection
-            rootNodes = FindUsbRoots(); 
+            rootNodes = FindUsbRoots();
 
             timer.Interval = 200;
             timer.Elapsed += (s, e) =>
@@ -40,11 +40,13 @@ namespace lunOptics.libUsbTree
             };
             CheckForChanges();  // implicitly starts timer            
         }
-               
+
         protected virtual void Dispose(bool disposing)
         {
             if (disposing && timer != null)
             {
+                timer.Enabled = false;
+                timer.Elapsed -= (s, e) => { };
                 timer.Dispose();
                 timer = null;
             }
@@ -60,35 +62,38 @@ namespace lunOptics.libUsbTree
 
         #region private fields and methods -------------------------------------------------------------
 
-        private InfoNode oldTree, newTree;        
+        private InfoNode oldTree, newTree;
 
         private void CheckForChanges()
         {
-            timer.Stop(); // avoid reentrance
-
-            //var sw = new Stopwatch();
-            //sw.Start();
-            newTree = new InfoNode(rootNodes);
-            if(!newTree.isEqual(oldTree))
+            if (timer != null)
             {
-                newTree.readDetails();
-                _deviceTree.update(newTree);  // update the complete device tree. Add/remove devices if necessary
-                UpdateDeviceList();          // reflect all changes in the flat device list     
-                oldTree = newTree;
-            }
-            //sw.Stop();
-            //Debug.WriteLine(sw.Elapsed.TotalMilliseconds);
+                timer.Stop(); // avoid reentrance
 
-            timer.Start();
+                newTree = new InfoNode(rootNodes);
+
+                bool isEqual = newTree.isEqual(oldTree);
+                
+                if(!isEqual || DateTime.Now < lastChange + TimeSpan.FromSeconds(5))                
+                {
+                    //if (!isEqual) lastChange = DateTime.Now;
+                    newTree.readDetails();
+                    _deviceTree.update(newTree);  // update the complete device tree. Add/remove devices if necessary
+                    UpdateDeviceList();           // reflect all changes in the flat device list     
+                    oldTree = newTree;
+                }
+                timer.Start();
+            }
         }
-             
+
+        DateTime lastChange = DateTime.Now;
 
         void UpdateDeviceList()
         {
             var flatList = DeviceTree.children.myFlatten(i => i.children);
             var newDevices = flatList.Except(DeviceList).ToList();
             var removedDevices = DeviceList.Except(flatList).ToList();
-            
+
             newDevices.ForEach(d => DeviceList.Add(d));
             removedDevices.ForEach(d => DeviceList.Remove(d));
 
@@ -116,7 +121,7 @@ namespace lunOptics.libUsbTree
             return roots.ToList();
         }
 
-        private readonly List<int> rootNodes;       
+        private readonly List<int> rootNodes;
 
         private System.Timers.Timer timer = new System.Timers.Timer();
 
