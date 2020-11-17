@@ -17,7 +17,7 @@ namespace lunOptics.libUsbTree
         public string DeviceInstanceID { get; private set; }
         public List<string> HardwareIDs { get; private set; }
         public string Description { get; protected set; }
-        public bool IsConnected { get; protected set; }
+        public bool IsConnected { get;  set; }
         public Guid ClassGuid { get; private set; }
         public string ClassDescription { get; private set; }
         protected string SnString { get; private set; }
