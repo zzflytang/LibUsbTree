@@ -8,7 +8,7 @@
     <PackageReference Include="System.ObjectModel" Version="4.3.0" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup>  
     <ProjectReference Include="..\..\src\LibUsbTree.csproj" />
   </ItemGroup>
 

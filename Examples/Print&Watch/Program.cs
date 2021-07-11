@@ -10,33 +10,32 @@ namespace UsbTreeTester
     {
         static void Main()
         {
-            var usbTree = new UsbTree();
+            var usbTree = new UsbTree(); 
 
-            ForegroundColor = ConsoleColor.Blue;       
+            ForegroundColor = ConsoleColor.Blue;
             WriteLine("===============================================================");
             WriteLine(" Currently connected USB devices");
             WriteLine("===============================================================\n");
-                        
+
 
             WriteLine("FLAT DEVICE LIST: ---------------------------------------------");
-            ForegroundColor = ConsoleColor.White;
 
             foreach (var device in usbTree.DeviceList)
             {
-                WriteLine($"  - {device}");
+                PrintDevice(device);
             }
 
             ForegroundColor = ConsoleColor.Blue;
             WriteLine("\nHIERARCHICAL DEVICE LIST: -----------------------------------");
-            ForegroundColor = ConsoleColor.White;
 
-            foreach (var root in usbTree.DeviceTree.children) 
+            foreach (var root in usbTree.DeviceTree.children)
             {
-                PrintRecursively(root);          
+                PrintRecursively(root);
             }
 
             ForegroundColor = ConsoleColor.Blue;
             WriteLine("\n\nPlug in/out devices to see changes or press any key to stop\n");
+
             usbTree.DeviceList.CollectionChanged += DevicesChanged;
 
             while (!KeyAvailable) Thread.Sleep(100);
@@ -51,17 +50,17 @@ namespace UsbTreeTester
             {
                 case NotifyCollectionChangedAction.Add:
                     ForegroundColor = ConsoleColor.DarkGreen;
-                    foreach (UsbDevice device in e.NewItems)
+                    foreach (IUsbDevice device in e.NewItems)
                     {
-                        WriteLine($"+ {device}");                        
+                        WriteLine($"+ {device}");
                     }
                     break;
 
                 case NotifyCollectionChangedAction.Remove:
                     ForegroundColor = ConsoleColor.DarkGray;
-                    foreach (UsbDevice device in e.OldItems)
+                    foreach (IUsbDevice device in e.OldItems)
                     {
-                        WriteLine($"- {device.ToString()}");                        
+                        WriteLine($"- {device.ToString()}");
                     }
                     break;
 
@@ -71,16 +70,22 @@ namespace UsbTreeTester
             }
         }
 
-        private static void PrintRecursively(UsbDevice device, int level = 2)
+        private static void PrintRecursively(IUsbDevice device, int level = 2)
         {
             if (device == null) throw new ArgumentNullException(nameof(device));
 
-            Write(new String(' ', level ));  // indent proprtional to level
-            WriteLine(device.ToString());
+            Write(new String(' ', level));  // indent proprtional to level            
+            PrintDevice(device);
             foreach (var c in device.children)
             {
                 PrintRecursively(c, level + 2);
             }
+        }
+
+        private static void PrintDevice(IUsbDevice device)
+        {
+            ForegroundColor =  ConsoleColor.White;
+            WriteLine($"  - {device}");
         }
     }
 }
