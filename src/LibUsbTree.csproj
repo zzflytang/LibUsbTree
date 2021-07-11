@@ -4,13 +4,15 @@
     <TargetFrameworks>netstandard2.0;netstandard2.1;net46</TargetFrameworks>
     <RootNamespace>lunOptics.LibUsbTree</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.1</Version>
+    <Version>0.1.0-beta</Version>
     <Authors>Lutz Niggl</Authors>
     <Company>lunOptics</Company>
     <Copyright>lunOptics</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/luni64/LibUsbTree</PackageProjectUrl>
-    <PackageTags>USB UsbDevices Cfgmgr32</PackageTags>
+    <PackageTags>USB UsbDevices</PackageTags>
+    <Description>List connected usb devices, detect plug in/out</Description>
+    <PackageReleaseNotes>beta version, do not use for productive code</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
